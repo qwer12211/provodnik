@@ -7,40 +7,36 @@ public static class Explorer
     private static void Main()
     {
         DriveInfo[] allDrives = DriveInfo.GetDrives();
-        string[] options = new string[allDrives.Length];
+        string[] driveOptions = GetDriveOptions(allDrives);
 
-        for (int i = 0; i < allDrives.Length; i++)
-        {
-            options[i] = $"{allDrives[i].Name} " +
-                         $"{allDrives[i].AvailableFreeSpace / (1024 * 1024 * 1024):N2} ГБ свободно из " +
-                         $"{allDrives[i].TotalSize / (1024 * 1024 * 1024):N2} ГБ";
-        }
-
-        int selectedDrive = ArrowMenu.ShowMenu(options);
+        int selectedDrive = ArrowMenu.ShowMenu(driveOptions);
         string selectedDriveName = allDrives[selectedDrive].Name;
 
-        folders(selectedDriveName);
+        ExploreFolders(selectedDriveName);
     }
 
-    private static void folders(string path)
+    private static string[] GetDriveOptions(DriveInfo[] drives)
+    {
+        string[] options = new string[drives.Length];
+
+        for (int i = 0; i < drives.Length; i++)
+        {
+            options[i] = $"{drives[i].Name} " +
+                         $"{drives[i].AvailableFreeSpace / (1024 * 1024 * 1024):N2} GB свободно из " +
+                         $"{drives[i].TotalSize / (1024 * 1024 * 1024):N2} GB";
+        }
+
+        return options;
+    }
+
+    private static void ExploreFolders(string path)
     {
         DirectoryInfo dirInfo = new DirectoryInfo(path);
 
         DirectoryInfo[] directories = dirInfo.GetDirectories();
         FileInfo[] files = dirInfo.GetFiles();
 
-        string[] options = new string[directories.Length + files.Length];
-
-        int i = 0;
-        foreach (DirectoryInfo directory in directories)
-        {
-            options[i++] = String.Format("{0,-45} {1,25}", directory.Name, directory.CreationTime.ToString("dd.MM.yyyy HH:mm"));
-        }
-
-        foreach (FileInfo file in files)
-        {
-            options[i++] = String.Format("{0,-45} {1,25} {2,10}", file.Name, file.CreationTime.ToString("dd.MM.yyyy HH:mm"), file.Extension);
-        }
+        string[] options = GetFolderFileOptions(directories, files);
 
         int selectedOption = ArrowMenu.ShowMenu(options);
 
@@ -48,7 +44,7 @@ public static class Explorer
         {
             if (dirInfo.Parent != null)
             {
-                folders(dirInfo.Parent.FullName);
+                ExploreFolders(dirInfo.Parent.FullName);
             }
             else
             {
@@ -57,15 +53,34 @@ public static class Explorer
         }
         else if (selectedOption < directories.Length)
         {
-            folders(directories[selectedOption].FullName);
+            ExploreFolders(directories[selectedOption].FullName);
         }
         else
         {
             string selectedFilePath = files[selectedOption - directories.Length].FullName;
-            openFiles(selectedFilePath);
+            OpenFile(selectedFilePath);
         }
     }
-    private static void openFiles(string filePath)
+
+    private static string[] GetFolderFileOptions(DirectoryInfo[] directories, FileInfo[] files)
+    {
+        string[] options = new string[directories.Length + files.Length];
+
+        int i = 0;
+        foreach (DirectoryInfo directory in directories)
+        {
+            options[i++] = $"{directory.Name,-45} {directory.CreationTime,-25:dd.MM.yyyy HH:mm}";
+        }
+
+        foreach (FileInfo file in files)
+        {
+            options[i++] = $"{file.Name,-45} {file.CreationTime,-25:dd.MM.yyyy HH:mm} {file.Extension,-10}";
+        }
+
+        return options;
+    }
+
+    private static void OpenFile(string filePath)
     {
         try
         {
@@ -76,11 +91,10 @@ public static class Explorer
             };
 
             Process.Start(startInfo);
-
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Что-то вы не то открыли: {ex.Message}");
+            Console.WriteLine($"Oшибка открытия {ex.Message}");
         }
     }
 }
