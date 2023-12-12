@@ -1,4 +1,3 @@
-using System;
 public static class ArrowMenu
 {
     public static int ShowMenu(string[] items)
