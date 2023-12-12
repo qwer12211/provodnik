@@ -1,5 +1,3 @@
-using System;
-using System.IO;
 using System.Diagnostics;
 
 public static class Explorer
@@ -15,34 +13,34 @@ public static class Explorer
         ExploreFolders(selectedDriveName);
     }
 
-   private static string[] GetDriveOptions(DriveInfo[] drives)
-{
-    string[] options = new string[drives.Length];
-
-    for (int i = 0; i < drives.Length; i++)
+    private static string[] GetDriveOptions(DriveInfo[] drives)
     {
-        string driveName = drives[i].Name;
-        long availableSpace = drives[i].AvailableFreeSpace;
-        long totalSize = drives[i].TotalSize;
+        string[] options = new string[drives.Length];
 
-        string formattedAvailableSpace = FormatSize(availableSpace);
-        string formattedTotalSize = FormatSize(totalSize);
+        for (int i = 0; i < drives.Length; i++)
+        {
+            string driveName = drives[i].Name;
+            long availableSpace = drives[i].AvailableFreeSpace;
+            long totalSize = drives[i].TotalSize;
 
-        options[i] = $"{driveName} {formattedAvailableSpace} свободно из {formattedTotalSize}";
+            string formattedAvailableSpace = FormatSize(availableSpace);
+            string formattedTotalSize = FormatSize(totalSize);
+
+            options[i] = $"{driveName} {formattedAvailableSpace} свободно из {formattedTotalSize}";
+        }
+
+        return options;
     }
 
-    return options;
-}
+    private static string FormatSize(long sizeInBytes)
+    {
+        const double GB = 1024 * 1024 * 1024;
 
-private static string FormatSize(long sizeInBytes)
-{
-    const double GB = 1024 * 1024 * 1024;
+        double sizeInGB = (double)sizeInBytes / GB;
+        string formattedSize = $"{sizeInGB:N2} GB";
 
-    double sizeInGB = (double)sizeInBytes / GB;
-    string formattedSize = $"{sizeInGB:N2} GB";
-
-    return formattedSize;
-}
+        return formattedSize;
+    }
 
     private static void ExploreFolders(string path)
     {
