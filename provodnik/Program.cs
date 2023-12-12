@@ -15,19 +15,34 @@ public static class Explorer
         ExploreFolders(selectedDriveName);
     }
 
-    private static string[] GetDriveOptions(DriveInfo[] drives)
+   private static string[] GetDriveOptions(DriveInfo[] drives)
+{
+    string[] options = new string[drives.Length];
+
+    for (int i = 0; i < drives.Length; i++)
     {
-        string[] options = new string[drives.Length];
+        string driveName = drives[i].Name;
+        long availableSpace = drives[i].AvailableFreeSpace;
+        long totalSize = drives[i].TotalSize;
 
-        for (int i = 0; i < drives.Length; i++)
-        {
-            options[i] = $"{drives[i].Name} " +
-                         $"{drives[i].AvailableFreeSpace / (1024 * 1024 * 1024):N2} GB свободно из " +
-                         $"{drives[i].TotalSize / (1024 * 1024 * 1024):N2} GB";
-        }
+        string formattedAvailableSpace = FormatSize(availableSpace);
+        string formattedTotalSize = FormatSize(totalSize);
 
-        return options;
+        options[i] = $"{driveName} {formattedAvailableSpace} свободно из {formattedTotalSize}";
     }
+
+    return options;
+}
+
+private static string FormatSize(long sizeInBytes)
+{
+    const double GB = 1024 * 1024 * 1024;
+
+    double sizeInGB = (double)sizeInBytes / GB;
+    string formattedSize = $"{sizeInGB:N2} GB";
+
+    return formattedSize;
+}
 
     private static void ExploreFolders(string path)
     {
